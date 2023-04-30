@@ -130,11 +130,22 @@ function minimizeBlockquote(timelineItem, seenComments) {
     const blockquoteText = blockquote.innerText.trim().replace(/\s+/g, ' ')
     const dupIndex = seenComments.findIndex((comment) => comment.text === blockquoteText)
     if (dupIndex >= 0) {
+      // if replying to the one above, always minimize it
       if (dupIndex === seenComments.length - 1) {
-        blockquote.innerHTML = `Replying to above (shortened by refined-github-comments)`
-      } else if (blockquoteText.length > 200) {
+        // use js-clear so github would remove this summary when re-quoting this reply,
+        // add nbsp so that the summary tag has some content, that the details would also
+        // get copied when re-quoting too.
+        const summary =  `<span class="js-clear">Replying to above</span>&nbsp;`
+        blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
+      }
+      // if replying to a long comment, or a comment with code, always minimize it
+      else if (blockquoteText.length > 200 || blockquote.querySelector('pre')) {
         const dup = seenComments[dupIndex]
-        blockquote.innerHTML = `Replying to <a href="#${dup.id}">comment</a> (shortened by refined-github-comments)`
+        // use js-clear so github would remove this summary when re-quoting this reply,
+        // add nbsp so that the summary tag has some content, that the details would also
+        // get copied when re-quoting too.
+        const summary = `<span class="js-clear">Replying to <a href="#${dup.id}">comment</a></span>&nbsp;`
+        blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
       }
     }
   })
