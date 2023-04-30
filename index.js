@@ -139,19 +139,25 @@ function minimizeBlockquote(timelineItem, seenComments) {
     if (dupIndex >= 0) {
       // if replying to the one above, always minimize it
       if (dupIndex === seenComments.length - 1) {
-        // use js-clear so github would remove this summary when re-quoting this reply,
+        // use span.js-clear so github would remove this summary when re-quoting this reply,
         // add nbsp so that the summary tag has some content, that the details would also
         // get copied when re-quoting too.
-        const summary = `<span class="js-clear text-italic refined-github-comments-reply-text">Replying to above entirely</span>&nbsp;`
+        const summary = `\
+<span class="js-clear text-italic refined-github-comments-reply-text">
+  Replying to above entirely
+</span>&nbsp;`
         blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
       }
       // if replying to a long comment, or a comment with code, always minimize it
       else if (blockquoteText.length > 200 || blockquote.querySelector('pre')) {
         const dup = seenComments[dupIndex]
-        // use js-clear so github would remove this summary when re-quoting this reply,
+        // use span.js-clear so github would remove this summary when re-quoting this reply,
         // add nbsp so that the summary tag has some content, that the details would also
         // get copied when re-quoting too.
-        const summary = `<span class="js-clear text-italic refined-github-comments-reply-text">Replying to <a href="#${dup.id}">comment</a> entirely</span>&nbsp;`
+        const summary = `\
+<span class="js-clear text-italic refined-github-comments-reply-text">
+  Replying to <a href="#${dup.id}">comment</a> entirely
+</span>&nbsp;`
         blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
       }
       continue
@@ -167,13 +173,21 @@ function minimizeBlockquote(timelineItem, seenComments) {
       
       // if replying to the one above, prepend hint
       if (partialDupIndex === seenComments.length - 1) {
-        const hint = `<div dir="auto" class="text-italic mb-2 refined-github-comments-reply-text">Replying to above partially (<a href="${textFragment}">go to fragment</a>):</div>`
+        // use span.js-clear so github would remove this hint when re-quoting this reply
+        const hint = `\
+<span dir="auto" class="js-clear text-italic mb-2 refined-github-comments-reply-text" style="opacity: 0.7; font-size: 90%;">
+  Replying to above partially (<a href="${textFragment}">go to fragment</a>):
+</span>`
         blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
       }
       // prepend generic hint
       else {
         const dup = seenComments[partialDupIndex]
-        const hint = `<div dir="auto" class="text-italic mb-2 refined-github-comments-reply-text">Replying to <a href="#${dup.id}">comment</a> partially (<a href="${textFragment}">go to fragment</a>):</div>`
+        // use span.js-clear so github would remove this hint when re-quoting this reply
+        const hint = `\
+<span dir="auto" class="js-clear text-italic mb-2 refined-github-comments-reply-text" style="opacity: 0.7; font-size: 90%;">
+  Replying to <a href="#${dup.id}">comment</a> partially (<a href="${textFragment}">go to fragment</a>):
+</span>`
         blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
       }
       continue
