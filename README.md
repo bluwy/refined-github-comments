@@ -1,6 +1,6 @@
 # Userscript: Refined GitHub Comments
 
-Hide comments from certain authors or with certain text.
+Hide comments from certain authors or with certain text. Enhance blockquote in comments.
 
 [Install on Greasyfork](https://greasyfork.org/en/scripts/465056-refined-github-comments)
 
@@ -14,10 +14,22 @@ Hide comments from certain authors or with certain text.
 - Hide comments with text matching:
   - starts with `!` or `/`
   - Astro's preview release bot output
+- Collapse whole-comment quote-replies
+- Link to original quote for partial quote-replies
+
+## Screenshots
 
 Comments hidden can be toggled open, and an excerpt is shown on the side.
 
-![example screenshot](https://user-images.githubusercontent.com/34116392/235110127-e1ee1156-49a2-44cc-8270-242542b25026.png)
+![hidden comments example](https://user-images.githubusercontent.com/34116392/235110127-e1ee1156-49a2-44cc-8270-242542b25026.png)
+
+Whole-comment quote-replies are collapsed and can be toggled open.
+
+![whole-comment quote-replies collapse example](https://user-images.githubusercontent.com/34116392/235340992-4215dbb6-8360-400f-9550-4b5633a2236e.png)
+
+Partial quote-replies have a link to the original quote.
+
+![partial quote-replies link example](https://user-images.githubusercontent.com/34116392/235341036-8693397c-5bc7-4342-91d2-34c36861cc37.png)
 
 ## Sponsors
 
