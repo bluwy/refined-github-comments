@@ -125,9 +125,16 @@ function minimizeBlockquote(timelineItem, seenComments) {
 
   const commentText = commentBody.innerText.trim().replace(/\s+/g, ' ')
 
-  const blockquotes = commentBody.querySelectorAll('blockquote')
-  blockquotes.forEach((blockquote) => {
+  // bail early in first comment and if comment is already checked before
+  if (seenComments.length === 0 || commentBody.querySelector('.refined-github-comments-reply-text')) {
+    seenComments.push({ text: commentText, id: commentId })
+    return
+  }
+
+  const blockquotes = commentBody.querySelectorAll(':scope > blockquote')
+  for (const blockquote of blockquotes) {
     const blockquoteText = blockquote.innerText.trim().replace(/\s+/g, ' ')
+
     const dupIndex = seenComments.findIndex((comment) => comment.text === blockquoteText)
     if (dupIndex >= 0) {
       // if replying to the one above, always minimize it
@@ -135,7 +142,7 @@ function minimizeBlockquote(timelineItem, seenComments) {
         // use js-clear so github would remove this summary when re-quoting this reply,
         // add nbsp so that the summary tag has some content, that the details would also
         // get copied when re-quoting too.
-        const summary =  `<span class="js-clear">Replying to above</span>&nbsp;`
+        const summary = `<span class="js-clear text-italic refined-github-comments-reply-text">Replying to above</span>&nbsp;`
         blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
       }
       // if replying to a long comment, or a comment with code, always minimize it
@@ -144,16 +151,30 @@ function minimizeBlockquote(timelineItem, seenComments) {
         // use js-clear so github would remove this summary when re-quoting this reply,
         // add nbsp so that the summary tag has some content, that the details would also
         // get copied when re-quoting too.
-        const summary = `<span class="js-clear">Replying to <a href="#${dup.id}">comment</a></span>&nbsp;`
+        const summary = `<span class="js-clear text-italic refined-github-comments-reply-text">Replying to <a href="#${dup.id}">comment</a></span>&nbsp;`
         blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
       }
+      continue
     }
-  })
 
-  seenComments.push({
-    text: commentText,
-    id: commentId,
-  })
+    const partialDupIndex = seenComments.findIndex((comment) => comment.text.includes(blockquoteText))
+    if (partialDupIndex >= 0) {
+      // if replying to the one above, prepend hint
+      if (dupIndex === seenComments.length - 1) {
+        const hint = `<div dir="auto" class="text-italic mb-2 refined-github-comments-reply-text">Replying to above (partial):</div>`
+        blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
+      }
+      // prepend generic hint
+      else {
+        const dup = seenComments[partialDupIndex]
+        const hint = `<div dir="auto" class="text-italic mb-2 refined-github-comments-reply-text">Replying to <a href="#${dup.id}">comment</a> (partial):</div>`
+        blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
+      }
+      continue
+    }
+  }
+
+  seenComments.push({ text: commentText, id: commentId })
 }
 
 // create the toggle comment like github does when you hide a comment
