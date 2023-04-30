@@ -22,7 +22,7 @@ const authorsToMinimize = [
 const commentMatchToMinimize = [
   /^![a-z]/, // commands that start with !
   /^\/[a-z]/, // commands that start with /
-  /> root@0.0.0/, // astro preview release bot 
+  /^> root@0.0.0/, // astro preview release bot 
 ]
 
 ;(function () {
@@ -37,63 +37,111 @@ const commentMatchToMinimize = [
 
 function run() {
   const allTimelineItem = document.querySelectorAll('.js-timeline-item')
+  const seenComments = []
 
   allTimelineItem.forEach((timelineItem) => {
-    // things can happen twice in github for some reason
-    if (timelineItem.querySelector('.refined-github-comments-toggle')) return
-    
-    const header = timelineItem.querySelector('.timeline-comment-header')
-    if (!header) return
+    minimizeComment(timelineItem)
+    minimizeBlockquote(timelineItem, seenComments)
+  })
+}
 
-    const headerName = header.querySelector('a.author')
-    if (!headerName) return
+// test urls:
+// https://github.com/withastro/astro/pull/6845
+/**
+ * @param {HTMLElement} timelineItem
+ */
+function minimizeComment(timelineItem) {
+  // things can happen twice in github for some reason
+  if (timelineItem.querySelector('.refined-github-comments-toggle')) return
+  
+  const header = timelineItem.querySelector('.timeline-comment-header')
+  if (!header) return
 
-    const commentBody = timelineItem.querySelector('.comment-body')
-    if (!commentBody) return
+  const headerName = header.querySelector('a.author')
+  if (!headerName) return
 
-    const commentBodyText = commentBody.innerText.trim()
+  const commentBody = timelineItem.querySelector('.comment-body')
+  if (!commentBody) return
 
-    // minimize the comment
-    if (
-      authorsToMinimize.includes(headerName.innerText) ||
-      commentMatchToMinimize.some((match) => match.test(commentBodyText))
-    ) {
-      const commentContent = timelineItem.querySelector('.edit-comment-hide')
-      if (!commentContent) return
-      const commentActions = timelineItem.querySelector('.timeline-comment-actions')
-      if (!commentActions) return
-      const headerH3 = header.querySelector('h3')
-      if (!headerH3) return
-      const headerDiv = headerH3.querySelector('div')
-      if (!headerDiv) return
+  const commentBodyText = commentBody.innerText.trim()
 
-      // hide comment
-      header.style.borderBottom = 'none'
-      commentContent.style.display = 'none'
+  // minimize the comment
+  if (
+    authorsToMinimize.includes(headerName.innerText) ||
+    commentMatchToMinimize.some((match) => match.test(commentBodyText))
+  ) {
+    const commentContent = timelineItem.querySelector('.edit-comment-hide')
+    if (!commentContent) return
+    const commentActions = timelineItem.querySelector('.timeline-comment-actions')
+    if (!commentActions) return
+    const headerH3 = header.querySelector('h3')
+    if (!headerH3) return
+    const headerDiv = headerH3.querySelector('div')
+    if (!headerDiv) return
 
-      // add comment excerpt
-      const excerpt = document.createElement('span')
-      excerpt.setAttribute('class', 'text-fg-muted text-normal text-italic css-truncate css-truncate-overflow mr-2')
-      excerpt.innerHTML = commentBodyText.slice(0, 100)
-      excerpt.style.opacity = '0.5'
-      headerH3.classList.add('css-truncate')
-      headerH3.classList.add('css-truncate-overflow')
-      headerDiv.appendChild(excerpt)
+    // hide comment
+    header.style.borderBottom = 'none'
+    commentContent.style.display = 'none'
 
-      // add toggle button
-      const toggleBtn = toggleComment((isShow) => {
-        if (isShow) {
-          header.style.borderBottom = ''
-          commentContent.style.display = ''
-          excerpt.style.display = 'none'
-        } else {
-          header.style.borderBottom = 'none'
-          commentContent.style.display = 'none'
-          excerpt.style.display = ''
-        }
-      })
-      commentActions.prepend(toggleBtn)
+    // add comment excerpt
+    const excerpt = document.createElement('span')
+    excerpt.setAttribute('class', 'text-fg-muted text-normal text-italic css-truncate css-truncate-overflow mr-2')
+    excerpt.innerHTML = commentBodyText.slice(0, 100)
+    excerpt.style.opacity = '0.5'
+    headerH3.classList.add('css-truncate')
+    headerH3.classList.add('css-truncate-overflow')
+    headerDiv.appendChild(excerpt)
+
+    // add toggle button
+    const toggleBtn = toggleComment((isShow) => {
+      if (isShow) {
+        header.style.borderBottom = ''
+        commentContent.style.display = ''
+        excerpt.style.display = 'none'
+      } else {
+        header.style.borderBottom = 'none'
+        commentContent.style.display = 'none'
+        excerpt.style.display = ''
+      }
+    })
+    commentActions.prepend(toggleBtn)
+  }
+}
+
+// test urls:
+// https://github.com/bluwy/refined-github-comments/issues/1
+// https://github.com/sveltejs/svelte/issues/2323
+// https://github.com/pnpm/pnpm/issues/6463
+/**
+ * @param {HTMLElement} timelineItem
+ * @param {{ text: string, id: string }[]} seenComments
+ */
+function minimizeBlockquote(timelineItem, seenComments) {
+  const commentBody = timelineItem.querySelector('.comment-body')
+  if (!commentBody) return
+
+  const commentId = timelineItem.querySelector('.timeline-comment-group')?.id
+  if (!commentId) return
+
+  const commentText = commentBody.innerText.trim().replace(/\s+/g, ' ')
+
+  const blockquotes = commentBody.querySelectorAll('blockquote')
+  blockquotes.forEach((blockquote) => {
+    const blockquoteText = blockquote.innerText.trim().replace(/\s+/g, ' ')
+    const dupIndex = seenComments.findIndex((comment) => comment.text === blockquoteText)
+    if (dupIndex >= 0) {
+      if (dupIndex === seenComments.length - 1) {
+        blockquote.innerHTML = `Replying to above (shortened by refined-github-comments)`
+      } else if (blockquoteText.length > 200) {
+        const dup = seenComments[dupIndex]
+        blockquote.innerHTML = `Replying to <a href="#${dup.id}">comment</a> (shortened by refined-github-comments)`
+      }
     }
+  })
+
+  seenComments.push({
+    text: commentText,
+    id: commentId,
   })
 }
 
