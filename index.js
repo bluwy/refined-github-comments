@@ -159,15 +159,21 @@ function minimizeBlockquote(timelineItem, seenComments) {
 
     const partialDupIndex = seenComments.findIndex((comment) => comment.text.includes(blockquoteText))
     if (partialDupIndex >= 0) {
+      // get first four words and last four words, craft a text fragment to highlight
+      const splitted = blockquoteText.split(' ')
+      const textFragment =  splitted.length < 9
+        ? `#:~:text=${encodeURIComponent(blockquoteText)}`
+        : `#:~:text=${encodeURIComponent(splitted.slice(0, 4).join(' '))},${encodeURIComponent(splitted.slice(-4).join(' '))}`
+      
       // if replying to the one above, prepend hint
-      if (dupIndex === seenComments.length - 1) {
-        const hint = `<div dir="auto" class="text-italic mb-2 refined-github-comments-reply-text">Replying to above (partial):</div>`
+      if (partialDupIndex === seenComments.length - 1) {
+        const hint = `<div dir="auto" class="text-italic mb-2 refined-github-comments-reply-text">Replying to above (<a href="${textFragment}">fragment</a>):</div>`
         blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
       }
       // prepend generic hint
       else {
         const dup = seenComments[partialDupIndex]
-        const hint = `<div dir="auto" class="text-italic mb-2 refined-github-comments-reply-text">Replying to <a href="#${dup.id}">comment</a> (partial):</div>`
+        const hint = `<div dir="auto" class="text-italic mb-2 refined-github-comments-reply-text">Replying to <a href="#${dup.id}">comment</a> (<a href="${textFragment}">fragment</a>):</div>`
         blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
       }
       continue
