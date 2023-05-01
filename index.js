@@ -4,7 +4,7 @@
 // @homepageURL  https://github.com/bluwy/refined-github-comments
 // @supportURL   https://github.com/bluwy/refined-github-comments
 // @namespace    https://greasyfork.org/en/scripts/465056-refined-github-comments
-// @version      0.1.1
+// @version      0.1.2
 // @description  Remove clutter in the comments view
 // @author       Bjorn Lu
 // @match        https://github.com/**
@@ -114,7 +114,7 @@ function minimizeComment(timelineItem) {
 // https://github.com/pnpm/pnpm/issues/6463
 /**
  * @param {HTMLElement} timelineItem
- * @param {{ text: string, id: string }[]} seenComments
+ * @param {{ text: string, id: string, author: string }[]} seenComments
  */
 function minimizeBlockquote(timelineItem, seenComments) {
   const commentBody = timelineItem.querySelector('.comment-body')
@@ -123,11 +123,14 @@ function minimizeBlockquote(timelineItem, seenComments) {
   const commentId = timelineItem.querySelector('.timeline-comment-group')?.id
   if (!commentId) return
 
+  const commentAuthor = timelineItem.querySelector('.timeline-comment-header a.author')?.innerText
+  if (!commentAuthor) return
+
   const commentText = commentBody.innerText.trim().replace(/\s+/g, ' ')
 
   // bail early in first comment and if comment is already checked before
   if (seenComments.length === 0 || commentBody.querySelector('.refined-github-comments-reply-text')) {
-    seenComments.push({ text: commentText, id: commentId })
+    seenComments.push({ text: commentText, id: commentId, author: commentAuthor })
     return
   }
 
@@ -137,6 +140,7 @@ function minimizeBlockquote(timelineItem, seenComments) {
 
     const dupIndex = seenComments.findIndex((comment) => comment.text === blockquoteText)
     if (dupIndex >= 0) {
+      const dup = seenComments[dupIndex]
       // if replying to the one above, always minimize it
       if (dupIndex === seenComments.length - 1) {
         // use span.js-clear so github would remove this summary when re-quoting this reply,
@@ -144,57 +148,64 @@ function minimizeBlockquote(timelineItem, seenComments) {
         // get copied when re-quoting too.
         const summary = `\
 <span class="js-clear text-italic refined-github-comments-reply-text">
-  Replying to above entirely
+  Replying to <strong>@${dup.author}</strong> above entirely
 </span>&nbsp;`
         blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
       }
       // if replying to a long comment, or a comment with code, always minimize it
       else if (blockquoteText.length > 200 || blockquote.querySelector('pre')) {
-        const dup = seenComments[dupIndex]
         // use span.js-clear so github would remove this summary when re-quoting this reply,
         // add nbsp so that the summary tag has some content, that the details would also
         // get copied when re-quoting too.
         const summary = `\
 <span class="js-clear text-italic refined-github-comments-reply-text">
-  Replying to <a href="#${dup.id}">comment</a> entirely
+  Replying to <strong>@${dup.author}</strong>'s <a href="#${dup.id}">comment</a> entirely
 </span>&nbsp;`
         blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
+      }
+      // otherwise, just add a hint so we don't have to navigate away a short sentence
+      else {
+        // use span.js-clear so github would remove this hint when re-quoting this reply
+        const hint = `\
+<span dir="auto" class="js-clear text-italic mb-2 refined-github-comments-reply-text" style="opacity: 0.7; font-size: 90%;">
+  Replying to <strong>@${dup.author}</strong>'s <a href="#${dup.id}">comment</a> entirely
+</span>`
+        blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
       }
       continue
     }
 
     const partialDupIndex = seenComments.findIndex((comment) => comment.text.includes(blockquoteText))
     if (partialDupIndex >= 0) {
+      const dup = seenComments[partialDupIndex]
       // get first four words and last four words, craft a text fragment to highlight
       const splitted = blockquoteText.split(' ')
       const textFragment =  splitted.length < 9
         ? `#:~:text=${encodeURIComponent(blockquoteText)}`
         : `#:~:text=${encodeURIComponent(splitted.slice(0, 4).join(' '))},${encodeURIComponent(splitted.slice(-4).join(' '))}`
-      
+
       // if replying to the one above, prepend hint
       if (partialDupIndex === seenComments.length - 1) {
         // use span.js-clear so github would remove this hint when re-quoting this reply
         const hint = `\
 <span dir="auto" class="js-clear text-italic mb-2 refined-github-comments-reply-text" style="opacity: 0.7; font-size: 90%;">
-  Replying to above partially (<a href="${textFragment}">go to fragment</a>):
+  Replying to <strong>@${dup.author}</strong> above partially <a href="${textFragment}">(view original quote)</a>
 </span>`
         blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
       }
       // prepend generic hint
       else {
-        const dup = seenComments[partialDupIndex]
         // use span.js-clear so github would remove this hint when re-quoting this reply
         const hint = `\
 <span dir="auto" class="js-clear text-italic mb-2 refined-github-comments-reply-text" style="opacity: 0.7; font-size: 90%;">
-  Replying to <a href="#${dup.id}">comment</a> partially (<a href="${textFragment}">go to fragment</a>):
+  Replying to <strong>@${dup.author}</strong>'s <a href="#${dup.id}">comment</a> partially <a href="${textFragment}">(view original quote)</a>
 </span>`
         blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
       }
-      continue
     }
   }
 
-  seenComments.push({ text: commentText, id: commentId })
+  seenComments.push({ text: commentText, id: commentId, author: commentAuthor })
 }
 
 // create the toggle comment like github does when you hide a comment
