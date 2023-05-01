@@ -25,11 +25,12 @@ Comments hidden can be toggled open, and an excerpt is shown on the side.
 
 Whole-comment quote-replies are collapsed and can be toggled open.
 
-![whole-comment quote-replies collapse example](https://user-images.githubusercontent.com/34116392/235340992-4215dbb6-8360-400f-9550-4b5633a2236e.png)
+![whole-comment quote-replies collapse example](https://user-images.githubusercontent.com/34116392/235412197-671e421a-53ad-4320-b59a-735d799df767.png
+)
 
 Partial quote-replies have a link to the original quote.
 
-![partial quote-replies link example](https://user-images.githubusercontent.com/34116392/235341036-8693397c-5bc7-4342-91d2-34c36861cc37.png)
+![partial quote-replies link example](https://user-images.githubusercontent.com/34116392/235412242-bead378d-b7f9-4c77-863e-a7128517766a.png)
 
 ## Sponsors
 
