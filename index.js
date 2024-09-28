@@ -18,6 +18,7 @@ const authorsToMinimize = [
   'codeflowapp',
   'netlify',
   'pkg-pr-new',
+  'codecov',
 ]
 
 // common comments that don't really add value
