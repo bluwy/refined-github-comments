@@ -16,6 +16,8 @@
 const authorsToMinimize = [
   'changeset-bot',
   'codeflowapp',
+  'netlify',
+  'pkg-pr-new',
 ]
 
 // common comments that don't really add value
