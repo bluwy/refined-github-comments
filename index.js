@@ -20,6 +20,7 @@ const authorsToMinimize = [
   'vercel',
   'pkg-pr-new',
   'codecov',
+  'astrobot-houston',
 ]
 
 // common comments that don't really add value

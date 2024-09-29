@@ -15,6 +15,7 @@ Hide comments from certain authors or with certain text. Enhance blockquote in c
   - vercel
   - pkg-pr-new
   - codecov
+  - astrobot-houston
 - Hide comments with text matching:
   - starts with `!` or `/`
   - Astro's preview release bot output
