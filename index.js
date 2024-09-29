@@ -152,7 +152,7 @@ function minimizeBlockquote(timelineItem, seenComments) {
         // get copied when re-quoting too.
         const summary = `\
 <span class="js-clear text-italic refined-github-comments-reply-text">
-  Replying to <strong>@${dup.author}</strong> above entirely
+  Replying to <strong>@${dup.author}</strong> above
 </span>&nbsp;`
         blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
       }
@@ -163,7 +163,7 @@ function minimizeBlockquote(timelineItem, seenComments) {
         // get copied when re-quoting too.
         const summary = `\
 <span class="js-clear text-italic refined-github-comments-reply-text">
-  Replying to <strong>@${dup.author}</strong>'s <a href="#${dup.id}">comment</a> entirely
+  Replying to <strong>@${dup.author}</strong>'s <a href="#${dup.id}">comment</a>
 </span>&nbsp;`
         blockquote.innerHTML = `<details><summary>${summary}</summary>${blockquote.innerHTML}</details>`
       }
@@ -172,9 +172,9 @@ function minimizeBlockquote(timelineItem, seenComments) {
         // use span.js-clear so github would remove this hint when re-quoting this reply
         const hint = `\
 <span dir="auto" class="js-clear text-italic mb-2 refined-github-comments-reply-text" style="opacity: 0.7; font-size: 90%;">
-  Replying to <strong>@${dup.author}</strong>'s <a href="#${dup.id}">comment</a> entirely
+  Replying to <strong>@${dup.author}</strong>'s <a href="#${dup.id}">comment</a>
 </span>`
-        blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
+        blockquote.insertAdjacentHTML('beforebegin', hint)
       }
       continue
     }
@@ -192,19 +192,19 @@ function minimizeBlockquote(timelineItem, seenComments) {
       if (partialDupIndex === seenComments.length - 1) {
         // use span.js-clear so github would remove this hint when re-quoting this reply
         const hint = `\
-<span dir="auto" class="js-clear text-italic mb-2 refined-github-comments-reply-text" style="opacity: 0.7; font-size: 90%;">
-  Replying to <strong>@${dup.author}</strong> above partially <a href="${textFragment}">(view original quote)</a>
+<span dir="auto" class="js-clear text-italic refined-github-comments-reply-text" style="display: block; margin-top: -0.5rem; opacity: 0.7; font-size: 90%;">
+  — <strong>@${dup.author}</strong> <a href="${textFragment}">said</a> above
 </span>`
-        blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
+        blockquote.insertAdjacentHTML('beforeend', hint)
       }
       // prepend generic hint
       else {
         // use span.js-clear so github would remove this hint when re-quoting this reply
         const hint = `\
-<span dir="auto" class="js-clear text-italic mb-2 refined-github-comments-reply-text" style="opacity: 0.7; font-size: 90%;">
-  Replying to <strong>@${dup.author}</strong>'s <a href="#${dup.id}">comment</a> partially <a href="${textFragment}">(view original quote)</a>
+<span dir="auto" class="js-clear text-italic refined-github-comments-reply-text" style="display: block; margin-top: -0.5rem; opacity: 0.7; font-size: 90%;">
+  — <strong>@${dup.author}</strong> <a href="${textFragment}">said</a> in <a href="#${dup.id}">comment</a>
 </span>`
-        blockquote.innerHTML = `${hint}${blockquote.innerHTML}`
+        blockquote.insertAdjacentHTML('beforeend', hint)
       }
     }
   }
