@@ -17,6 +17,7 @@ const authorsToMinimize = [
   'changeset-bot',
   'codeflowapp',
   'netlify',
+  'vercel',
   'pkg-pr-new',
   'codecov',
 ]

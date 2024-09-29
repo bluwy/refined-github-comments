@@ -11,6 +11,10 @@ Hide comments from certain authors or with certain text. Enhance blockquote in c
 - Hide comments from authors:
   - changeset-bot
   - codeflowapp
+  - netlify
+  - vercel
+  - pkg-pr-new
+  - codecov
 - Hide comments with text matching:
   - starts with `!` or `/`
   - Astro's preview release bot output
@@ -25,8 +29,7 @@ Comments hidden can be toggled open, and an excerpt is shown on the side.
 
 Whole-comment quote-replies are collapsed and can be toggled open.
 
-![whole-comment quote-replies collapse example](https://user-images.githubusercontent.com/34116392/235412197-671e421a-53ad-4320-b59a-735d799df767.png
-)
+![whole-comment quote-replies collapse example](https://user-images.githubusercontent.com/34116392/235412197-671e421a-53ad-4320-b59a-735d799df767.png)
 
 Partial quote-replies have a link to the original quote.
 
