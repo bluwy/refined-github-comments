@@ -93,17 +93,19 @@ function minimizeComment(timelineItem) {
     excerpt.setAttribute('class', 'text-fg-muted text-normal text-italic css-truncate css-truncate-overflow mr-2')
     excerpt.innerHTML = commentBodyText.slice(0, 100)
     excerpt.style.opacity = '0.5'
-    headerH3.classList.add('css-truncate')
-    headerH3.classList.add('css-truncate-overflow')
+    headerH3.classList.add('css-truncate', 'css-truncate-overflow')
     headerDiv.appendChild(excerpt)
 
     // add toggle button
     const toggleBtn = toggleComment((isShow) => {
+      // headerH3 class needs to be toggled too so that the "edited dropdown" can be toggled
       if (isShow) {
+        headerH3.classList.remove('css-truncate', 'css-truncate-overflow')
         header.style.borderBottom = ''
         commentContent.style.display = ''
         excerpt.style.display = 'none'
       } else {
+        headerH3.classList.add('css-truncate', 'css-truncate-overflow')
         header.style.borderBottom = 'none'
         commentContent.style.display = 'none'
         excerpt.style.display = ''
@@ -219,16 +221,14 @@ function toggleComment(onClick) {
   // copied from github hidden comment style
   btn.innerHTML = `
 <div class="color-fg-muted f6 no-wrap">
-  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-unfold position-relative mr-1">
+  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-unfold position-relative">
   <path d="m8.177.677 2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25a.75.75 0 0 1-1.5 0V4H5.104a.25.25 0 0 1-.177-.427L7.823.677a.25.25 0 0 1 .354 0ZM7.25 10.75a.75.75 0 0 1 1.5 0V12h2.146a.25.25 0 0 1 .177.427l-2.896 2.896a.25.25 0 0 1-.354 0l-2.896-2.896A.25.25 0 0 1 5.104 12H7.25v-1.25Zm-5-2a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z"></path>
   </svg>
-  Show comment
 </div>
 <div class="color-fg-muted f6 no-wrap" style="display: none">
-  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-fold position-relative mr-1">
+  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-fold position-relative">
     <path d="M10.896 2H8.75V.75a.75.75 0 0 0-1.5 0V2H5.104a.25.25 0 0 0-.177.427l2.896 2.896a.25.25 0 0 0 .354 0l2.896-2.896A.25.25 0 0 0 10.896 2ZM8.75 15.25a.75.75 0 0 1-1.5 0V14H5.104a.25.25 0 0 1-.177-.427l2.896-2.896a.25.25 0 0 1 .354 0l2.896 2.896a.25.25 0 0 1-.177.427H8.75v1.25Zm-6.5-6.5a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM6 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 6 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5ZM12 8a.75.75 0 0 1-.75.75h-.5a.75.75 0 0 1 0-1.5h.5A.75.75 0 0 1 12 8Zm2.25.75a.75.75 0 0 0 0-1.5h-.5a.75.75 0 0 0 0 1.5h.5Z"></path>
   </svg>
-  Hide comment
 </div>
 `
   const showNode = btn.querySelector('div:nth-child(1)')
@@ -236,8 +236,6 @@ function toggleComment(onClick) {
   let isShow = false
   btn.setAttribute('type', 'button')
   btn.setAttribute('class', 'refined-github-comments-toggle timeline-comment-action btn-link')
-  btn.style.marginTop = '2px'
-  btn.style.marginRight = '4px'
   btn.addEventListener('click', () => {
     isShow = !isShow
     if (isShow) {
