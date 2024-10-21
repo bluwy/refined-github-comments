@@ -12,6 +12,8 @@
 // @grant        none
 // ==/UserScript==
 
+// #region User settings
+
 // common bots that i already know what they do
 const authorsToMinimize = [
   'changeset-bot',
@@ -27,8 +29,12 @@ const authorsToMinimize = [
 const commentMatchToMinimize = [
   /^![a-z]/, // commands that start with !
   /^\/[a-z]/, // commands that start with /
-  /^> root@0.0.0/, // astro preview release bot 
+  /^> root@0.0.0/, // astro preview release bot
 ]
+
+// #endregion
+
+// #region Run code
 
 ;(function () {
   'use strict'
@@ -50,6 +56,10 @@ function run() {
   })
 }
 
+// #endregion
+
+// #region Features: minimize comment
+
 // test urls:
 // https://github.com/withastro/astro/pull/6845
 /**
@@ -58,7 +68,7 @@ function run() {
 function minimizeComment(timelineItem) {
   // things can happen twice in github for some reason
   if (timelineItem.querySelector('.refined-github-comments-toggle')) return
-  
+
   const header = timelineItem.querySelector('.timeline-comment-header')
   if (!header) return
 
@@ -77,7 +87,9 @@ function minimizeComment(timelineItem) {
   ) {
     const commentContent = timelineItem.querySelector('.edit-comment-hide')
     if (!commentContent) return
-    const commentActions = timelineItem.querySelector('.timeline-comment-actions')
+    const commentActions = timelineItem.querySelector(
+      '.timeline-comment-actions'
+    )
     if (!commentActions) return
     const headerH3 = header.querySelector('h3')
     if (!headerH3) return
@@ -90,7 +102,10 @@ function minimizeComment(timelineItem) {
 
     // add comment excerpt
     const excerpt = document.createElement('span')
-    excerpt.setAttribute('class', 'text-fg-muted text-normal text-italic css-truncate css-truncate-overflow mr-2')
+    excerpt.setAttribute(
+      'class',
+      'text-fg-muted text-normal text-italic css-truncate css-truncate-overflow mr-2'
+    )
     excerpt.innerHTML = commentBodyText.slice(0, 100)
     excerpt.style.opacity = '0.5'
     headerH3.classList.add('css-truncate', 'css-truncate-overflow')
@@ -115,6 +130,10 @@ function minimizeComment(timelineItem) {
   }
 }
 
+// #endregion
+
+// #region Features: minimize blockquote
+
 // test urls:
 // https://github.com/bluwy/refined-github-comments/issues/1
 // https://github.com/sveltejs/svelte/issues/2323
@@ -130,14 +149,23 @@ function minimizeBlockquote(timelineItem, seenComments) {
   const commentId = timelineItem.querySelector('.timeline-comment-group')?.id
   if (!commentId) return
 
-  const commentAuthor = timelineItem.querySelector('.timeline-comment-header a.author')?.innerText
+  const commentAuthor = timelineItem.querySelector(
+    '.timeline-comment-header a.author'
+  )?.innerText
   if (!commentAuthor) return
 
   const commentText = commentBody.innerText.trim().replace(/\s+/g, ' ')
 
   // bail early in first comment and if comment is already checked before
-  if (seenComments.length === 0 || commentBody.querySelector('.refined-github-comments-reply-text')) {
-    seenComments.push({ text: commentText, id: commentId, author: commentAuthor })
+  if (
+    seenComments.length === 0 ||
+    commentBody.querySelector('.refined-github-comments-reply-text')
+  ) {
+    seenComments.push({
+      text: commentText,
+      id: commentId,
+      author: commentAuthor,
+    })
     return
   }
 
@@ -145,7 +173,9 @@ function minimizeBlockquote(timelineItem, seenComments) {
   for (const blockquote of blockquotes) {
     const blockquoteText = blockquote.innerText.trim().replace(/\s+/g, ' ')
 
-    const dupIndex = seenComments.findIndex((comment) => comment.text === blockquoteText)
+    const dupIndex = seenComments.findIndex(
+      (comment) => comment.text === blockquoteText
+    )
     if (dupIndex >= 0) {
       const dup = seenComments[dupIndex]
       // if replying to the one above, always minimize it
@@ -182,14 +212,19 @@ function minimizeBlockquote(timelineItem, seenComments) {
       continue
     }
 
-    const partialDupIndex = seenComments.findIndex((comment) => comment.text.includes(blockquoteText))
+    const partialDupIndex = seenComments.findIndex((comment) =>
+      comment.text.includes(blockquoteText)
+    )
     if (partialDupIndex >= 0) {
       const dup = seenComments[partialDupIndex]
       // get first four words and last four words, craft a text fragment to highlight
       const splitted = blockquoteText.split(' ')
-      const textFragment =  splitted.length < 9
-        ? `#:~:text=${encodeURIComponent(blockquoteText)}`
-        : `#:~:text=${encodeURIComponent(splitted.slice(0, 4).join(' '))},${encodeURIComponent(splitted.slice(-4).join(' '))}`
+      const textFragment =
+        splitted.length < 9
+          ? `#:~:text=${encodeURIComponent(blockquoteText)}`
+          : `#:~:text=${encodeURIComponent(
+              splitted.slice(0, 4).join(' ')
+            )},${encodeURIComponent(splitted.slice(-4).join(' '))}`
 
       // if replying to the one above, prepend hint
       if (partialDupIndex === seenComments.length - 1) {
@@ -215,6 +250,10 @@ function minimizeBlockquote(timelineItem, seenComments) {
   seenComments.push({ text: commentText, id: commentId, author: commentAuthor })
 }
 
+// #endregion
+
+// #region Utilities
+
 // create the toggle comment like github does when you hide a comment
 function toggleComment(onClick) {
   const btn = document.createElement('button')
@@ -235,7 +274,10 @@ function toggleComment(onClick) {
   const hideNode = btn.querySelector('div:nth-child(2)')
   let isShow = false
   btn.setAttribute('type', 'button')
-  btn.setAttribute('class', 'refined-github-comments-toggle timeline-comment-action btn-link')
+  btn.setAttribute(
+    'class',
+    'refined-github-comments-toggle timeline-comment-action btn-link'
+  )
   btn.addEventListener('click', () => {
     isShow = !isShow
     if (isShow) {
@@ -249,3 +291,5 @@ function toggleComment(onClick) {
   })
   return btn
 }
+
+// #endregion
