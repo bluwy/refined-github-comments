@@ -4,7 +4,7 @@
 // @homepageURL  https://github.com/bluwy/refined-github-comments
 // @supportURL   https://github.com/bluwy/refined-github-comments
 // @namespace    https://greasyfork.org/en/scripts/465056-refined-github-comments
-// @version      0.2.0
+// @version      0.2.1
 // @description  Remove clutter in the comments view
 // @author       Bjorn Lu
 // @match        https://github.com/**
