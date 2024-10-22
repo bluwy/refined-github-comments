@@ -36,6 +36,10 @@ const commentMatchToMinimize = [
 
 // #region Run code
 
+// Used by `minimizeDiscussionThread`
+let expandedThread = false
+const maxParentThreadHeight = 185
+
 ;(function () {
   'use strict'
 
@@ -47,6 +51,7 @@ const commentMatchToMinimize = [
 })()
 
 function run() {
+  // Comments view
   const allTimelineItem = document.querySelectorAll('.js-timeline-item')
   const seenComments = []
 
@@ -54,6 +59,11 @@ function run() {
     minimizeComment(timelineItem)
     minimizeBlockquote(timelineItem, seenComments)
   })
+
+  // Discussion threads view
+  if (location.pathname.includes('/discussions/')) {
+    minimizeDiscussionThread()
+  }
 }
 
 // #endregion
@@ -252,6 +262,145 @@ function minimizeBlockquote(timelineItem, seenComments) {
 
 // #endregion
 
+// #region Features: minimize discussion threads
+
+// test urls:
+// https://github.com/vitejs/vite/discussions/18191
+function minimizeDiscussionThread() {
+  if (expandedThread) {
+    _minimizeDiscussionThread()
+    return
+  }
+
+  const discussionContainer = document.querySelector(
+    '.discussion.js-discussion > .js-timeline-marker'
+  )
+  if (!discussionContainer) return
+
+  const tripleDotMenuContainer = document.querySelector(
+    '.timeline-comment-actions'
+  )
+  if (!tripleDotMenuContainer) return
+
+  // Skip if already added
+  if (document.getElementById('refined-github-comments-expand-btn') != null)
+    return
+
+  tripleDotMenuContainer.style.display = 'flex'
+  tripleDotMenuContainer.style.alignItems = 'center'
+
+  // Create a "Collapse threads" button to enable this feature
+  const expandBtn = document.createElement('button')
+  expandBtn.id = 'refined-github-comments-expand-btn'
+  expandBtn.setAttribute(
+    'class',
+    'Button--iconOnly Button--invisible Button--medium Button mr-2'
+  )
+  expandBtn.innerHTML = `\
+<svg class="Button-visual octicon octicon-zap" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <path d="M9.504.43a1.516 1.516 0 0 1 2.437 1.713L10.415 5.5h2.123c1.57 0 2.346 1.909 1.22 3.004l-7.34 7.142a1.249 1.249 0 0 1-.871.354h-.302a1.25 1.25 0 0 1-1.157-1.723L5.633 10.5H3.462c-1.57 0-2.346-1.909-1.22-3.004L9.503.429Zm1.047 1.074L3.286 8.571A.25.25 0 0 0 3.462 9H6.75a.75.75 0 0 1 .694 1.034l-1.713 4.188 6.982-6.793A.25.25 0 0 0 12.538 7H9.25a.75.75 0 0 1-.683-1.06l2.008-4.418.003-.006a.036.036 0 0 0-.004-.009l-.006-.006-.008-.001c-.003 0-.006.002-.009.004Z"></path>
+</svg>
+`
+  expandBtn.title = 'Collapse threads'
+  expandBtn.addEventListener('click', () => {
+    expandedThread = true
+    _minimizeDiscussionThread()
+    expandBtn.remove()
+  })
+  tripleDotMenuContainer.prepend(expandBtn)
+}
+
+function _minimizeDiscussionThread() {
+  const timelineComments = document.querySelectorAll(
+    '.timeline-comment.comment:not(.nested-discussion-timeline-comment)'
+  )
+  for (const timelineComment of timelineComments) {
+    // Skip if already handled
+    if (timelineComment.querySelector('.refined-github-comments-toggle'))
+      continue
+
+    const parentThreadContent = timelineComment.children[1]
+    if (!parentThreadContent) continue
+
+    // Find the "N replies" bottom text (a bit finicky but seems like the best selector)
+    const bottomText = parentThreadContent.querySelector(
+      'span.color-fg-muted.no-wrap'
+    )
+    const childrenThread = timelineComment.querySelector(
+      '[data-child-comments]'
+    )
+    // Skip if 0 replies
+    if (
+      bottomText &&
+      childrenThread &&
+      /\d+/.exec(bottomText.textContent)?.[0] !== '0'
+    ) {
+      // Prepend a "expand thread" button
+      // const expandBtn = document.createElement('button')
+      // expandBtn.setAttribute('class', 'Button--secondary Button--small Button')
+      // expandBtn.innerHTML = 'Expand thread'
+      // expandBtn.addEventListener('click', () => {
+      //   threadComment.style.display = ''
+      //   bottomText.style.display = 'none'
+      // })
+      const toggleBtn = toggleComment((isShow) => {
+        // Re-query as GitHub may update it when , e.g. showing more comments
+        const childrenThreadAgain = timelineComment.querySelector(
+          '[data-child-comments]'
+        )
+        if (childrenThreadAgain) {
+          if (isShow) {
+            childrenThreadAgain.style.display = ''
+            bottomText.classList.add('color-fg-muted')
+          } else {
+            childrenThreadAgain.style.display = 'none'
+            bottomText.classList.remove('color-fg-muted')
+          }
+        }
+      })
+      bottomText.parentElement.insertBefore(toggleBtn, bottomText)
+      childrenThread.style.display = 'none'
+      bottomText.classList.remove('color-fg-muted')
+      // Lazy to make the bottom text a button, share the click event to the button for now
+      // NOTE: This click happens to expand the comment too. I'm not sure how to prevent that.
+      bottomText.addEventListener('click', () => {
+        toggleBtn.click()
+      })
+    }
+
+    const commentBody = parentThreadContent.querySelector('.comment-body')
+    if (commentBody && commentBody.clientHeight > maxParentThreadHeight) {
+      // Shrink the OP thread to max height
+      const css = `max-height:${maxParentThreadHeight}px;mask-image:linear-gradient(180deg, #000 80%, transparent);-webkit-mask-image:linear-gradient(180deg, #000 80%, transparent);`
+      commentBody.style.cssText += css
+      // Add "view"
+      const commentActions = timelineComment.querySelector(
+        '.timeline-comment-actions'
+      )
+      const toggleCommentBodyBtn = toggleComment((isShow) => {
+        if (isShow) {
+          commentBody.style.maxHeight = ''
+          commentBody.style.maskImage = ''
+          commentBody.style.webkitMaskImage = ''
+        } else {
+          commentBody.style.cssText += css
+        }
+      })
+      commentActions.style.display = 'flex'
+      commentActions.style.alignItems = 'center'
+      commentActions.prepend(toggleCommentBodyBtn)
+      // Auto-expand on first click for nicer UX
+      commentBody.addEventListener('click', () => {
+        if (toggleCommentBodyBtn.dataset.show === 'false') {
+          toggleCommentBodyBtn.click()
+        }
+      })
+    }
+  }
+}
+
+// #endregion
+
 // #region Utilities
 
 // create the toggle comment like github does when you hide a comment
@@ -278,8 +427,10 @@ function toggleComment(onClick) {
     'class',
     'refined-github-comments-toggle timeline-comment-action btn-link'
   )
+  btn.dataset.show = isShow
   btn.addEventListener('click', () => {
     isShow = !isShow
+    btn.dataset.show = isShow
     if (isShow) {
       showNode.style.display = 'none'
       hideNode.style.display = ''

@@ -21,6 +21,7 @@ Hide comments from certain authors or with certain text. Enhance blockquote in c
   - Astro's preview release bot output
 - Collapse whole-comment quote-replies
 - Link to original quote for partial quote-replies
+- Experimental: Collapse threads in discussions (enable with bolt icon)
 
 ## Screenshots
 
