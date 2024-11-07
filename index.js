@@ -23,6 +23,7 @@ const authorsToMinimize = [
   'pkg-pr-new',
   'codecov',
   'astrobot-houston',
+  'codspeed-hq',
 ]
 
 // common comments that don't really add value
@@ -214,10 +215,10 @@ function minimizeBlockquote(timelineItem, seenComments) {
       else {
         // use span.js-clear so github would remove this hint when re-quoting this reply
         const hint = `\
-<span dir="auto" class="js-clear text-italic mb-2 refined-github-comments-reply-text" style="opacity: 0.7; font-size: 90%;">
-  Replying to <strong>@${dup.author}</strong>'s <a href="#${dup.id}">comment</a>
+<span dir="auto" class="js-clear text-italic refined-github-comments-reply-text" style="display: block; margin-top: -0.5rem; opacity: 0.7; font-size: 90%;">
+  — <strong>@${dup.author}</strong> said in <a href="#${dup.id}">comment</a>
 </span>`
-        blockquote.insertAdjacentHTML('beforebegin', hint)
+        blockquote.insertAdjacentHTML('beforeend', hint)
       }
       continue
     }
