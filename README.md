@@ -16,6 +16,7 @@ Hide comments from certain authors or with certain text. Enhance blockquote in c
   - pkg-pr-new
   - codecov
   - astrobot-houston
+  - codspeed-hq
 - Hide comments with text matching:
   - starts with `!` or `/`
   - Astro's preview release bot output
