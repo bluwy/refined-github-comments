@@ -52,13 +52,18 @@ const maxParentThreadHeight = 185
 })()
 
 function run() {
-  // Comments view
-  const allTimelineItem = document.querySelectorAll('.js-timeline-item')
-  const seenComments = []
+  initAndObserveTimeline(() => {
+    // Comments view
+    const allTimelineItem = [
+      ...document.querySelectorAll('.js-timeline-item'),
+      ...document.querySelectorAll('.react-issue-comment'),
+    ]
+    const seenComments = []
 
-  allTimelineItem.forEach((timelineItem) => {
-    minimizeComment(timelineItem)
-    minimizeBlockquote(timelineItem, seenComments)
+    allTimelineItem.forEach((timelineItem) => {
+      minimizeComment(timelineItem)
+      minimizeBlockquote(timelineItem, seenComments)
+    })
   })
 
   // Discussion threads view
@@ -102,7 +107,7 @@ function minimizeComment(timelineItem) {
       '.timeline-comment-actions'
     )
     if (!commentActions) return
-    const headerH3 = header.querySelector('h3')
+    const headerH3 = header.querySelector('h3.text-normal')
     if (!headerH3) return
     const headerDiv = headerH3.querySelector('div')
     if (!headerDiv) return
@@ -154,15 +159,20 @@ function minimizeComment(timelineItem) {
  * @param {{ text: string, id: string, author: string }[]} seenComments
  */
 function minimizeBlockquote(timelineItem, seenComments) {
-  const commentBody = timelineItem.querySelector('.comment-body')
+  const commentBody =
+    timelineItem.querySelector('.comment-body') ||
+    timelineItem.querySelector('.markdown-body')
   if (!commentBody) return
 
-  const commentId = timelineItem.querySelector('.timeline-comment-group')?.id
+  const commentId =
+    timelineItem.querySelector('.timeline-comment-group')?.id ||
+    timelineItem.querySelector('[data-testid="comment-header"]')?.id
   if (!commentId) return
 
-  const commentAuthor = timelineItem.querySelector(
-    '.timeline-comment-header a.author'
-  )?.innerText
+  const commentAuthor =
+    timelineItem.querySelector('.timeline-comment-header a.author')
+      ?.innerText ||
+    timelineItem.querySelector('[data-testid="avatar-link"]')?.innerText
   if (!commentAuthor) return
 
   const commentText = commentBody.innerText.trim().replace(/\s+/g, ' ')
@@ -180,7 +190,10 @@ function minimizeBlockquote(timelineItem, seenComments) {
     return
   }
 
-  const blockquotes = commentBody.querySelectorAll(':scope > blockquote')
+  const blockquotes = [
+    ...commentBody.querySelectorAll(':scope > blockquote'),
+    ...commentBody.querySelectorAll(':scope > div > blockquote'),
+  ]
   for (const blockquote of blockquotes) {
     const blockquoteText = blockquote.innerText.trim().replace(/\s+/g, ' ')
 
@@ -403,6 +416,36 @@ function _minimizeDiscussionThread() {
 // #endregion
 
 // #region Utilities
+
+/**
+ * Observe new comments
+ * https://github.com/tjx666/user-scripts/blob/31584918a223d4f220a01b32dc52e972b0aeec5f/refined-gitHub-comments-tj.user.js#L163-L195
+ * @param {Function} cb
+ */
+function initAndObserveTimeline(cb) {
+  cb()
+
+  const observer = new MutationObserver((mutations) => {
+    const hasNewComments = mutations.some(
+      (mutation) =>
+        mutation.type === 'childList' &&
+        Array.from(mutation.addedNodes).some(
+          (node) =>
+            node.nodeType === Node.ELEMENT_NODE &&
+            (node.classList?.contains('react-issue-comment') ||
+              node.querySelector?.('.react-issue-comment') ||
+              node.classList?.contains('js-timeline-item') ||
+              node.querySelector?.('.js-timeline-item'))
+        )
+    )
+
+    if (hasNewComments) {
+      setTimeout(() => cb(), 500)
+    }
+  })
+
+  observer.observe(document.body, { childList: true, subtree: true })
+}
 
 // create the toggle comment like github does when you hide a comment
 function toggleComment(onClick) {
