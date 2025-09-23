@@ -24,6 +24,8 @@ const authorsToMinimize = [
   'codecov',
   'astrobot-houston',
   'codspeed-hq',
+  'typescript-eslint',
+  'nx-cloud',
 ]
 
 // common comments that don't really add value
