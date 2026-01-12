@@ -126,6 +126,8 @@ function minimizeComment(timelineItem) {
     )
     excerpt.innerHTML = commentBodyText.slice(0, 100)
     excerpt.style.opacity = '0.5'
+    excerpt.style.flexGrow = '1'
+    excerpt.style.width = '0'
     headerH3.classList.add('css-truncate', 'css-truncate-overflow')
     headerDiv.appendChild(excerpt)
 
