@@ -15,6 +15,9 @@
 
 // #region User settings
 
+// set to true to minimize all bot comments (has a "bot" tag next to its name)
+const minimizeAllBotComments = false
+
 // common bots that i already know what they do
 const authorsToMinimize = [
   'changeset-bot',
@@ -101,6 +104,7 @@ function minimizeComment(timelineItem) {
 
   // minimize the comment
   if (
+    (minimizeAllBotComments && headerName.nextElementSibling?.textContent.includes('bot')) ||
     authorsToMinimize.includes(headerName.innerText) ||
     commentMatchToMinimize.some((match) => match.test(commentBodyText))
   ) {
@@ -121,7 +125,7 @@ function minimizeComment(timelineItem) {
     const excerpt = document.createElement('span')
     excerpt.setAttribute(
       'class',
-      'text-fg-muted text-normal text-italic css-truncate css-truncate-overflow mr-2'
+      'text-fg-muted text-normal text-italic css-truncate css-truncate-overflow mr-2',
     )
     excerpt.innerHTML = commentBodyText.slice(0, 100)
     excerpt.style.opacity = '0.5'
@@ -236,7 +240,7 @@ function minimizeBlockquote(timelineItem, seenComments) {
     }
 
     const partialDupIndex = seenComments.findIndex((comment) =>
-      comment.text.includes(blockquoteText)
+      comment.text.includes(blockquoteText),
     )
     if (partialDupIndex >= 0) {
       const dup = seenComments[partialDupIndex]
@@ -246,7 +250,7 @@ function minimizeBlockquote(timelineItem, seenComments) {
         splitted.length < 9
           ? `#:~:text=${encodeURIComponent(blockquoteText)}`
           : `#:~:text=${encodeURIComponent(splitted.slice(0, 4).join(' '))},${encodeURIComponent(
-              splitted.slice(-4).join(' ')
+              splitted.slice(-4).join(' '),
             )}`
 
       // if replying to the one above, prepend hint
@@ -286,7 +290,7 @@ function minimizeDiscussionThread() {
   }
 
   const discussionContainer = document.querySelector(
-    '.discussion.js-discussion > .js-timeline-marker'
+    '.discussion.js-discussion > .js-timeline-marker',
   )
   if (!discussionContainer) return
 
@@ -319,7 +323,7 @@ function minimizeDiscussionThread() {
 
 function _minimizeDiscussionThread() {
   const timelineComments = document.querySelectorAll(
-    '.timeline-comment.comment:not(.nested-discussion-timeline-comment)'
+    '.timeline-comment.comment:not(.nested-discussion-timeline-comment)',
   )
   for (const timelineComment of timelineComments) {
     // Skip if already handled
@@ -415,8 +419,8 @@ function initAndObserveTimeline(cb) {
             (node.classList?.contains('react-issue-comment') ||
               node.querySelector?.('.react-issue-comment') ||
               node.classList?.contains('js-timeline-item') ||
-              node.querySelector?.('.js-timeline-item'))
-        )
+              node.querySelector?.('.js-timeline-item')),
+        ),
     )
 
     if (hasNewComments) {

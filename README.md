@@ -22,6 +22,7 @@ Hide comments from certain authors or with certain text. Enhance blockquote in c
 - Hide comments with text matching:
   - starts with `!` or `/`
   - Astro's preview release bot output
+- Edit the script to optionally hide all bot comments (has a "bot" tag next to its name)
 - Collapse whole-comment quote-replies
 - Link to original quote for partial quote-replies
 - Experimental: Collapse threads in discussions (enable with bolt icon)
