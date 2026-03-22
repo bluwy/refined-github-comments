@@ -30,6 +30,7 @@ const authorsToMinimize = [
   'codspeed-hq',
   'typescript-eslint',
   'nx-cloud',
+  'flathubbot'
 ]
 
 // common comments that don't really add value
@@ -37,6 +38,7 @@ const commentMatchToMinimize = [
   /^![a-z]/, // commands that start with !
   /^\/[a-z]/, // commands that start with /
   /^> root@0.0.0/, // astro preview release bot
+  /^bot, build/
 ]
 
 // #endregion
