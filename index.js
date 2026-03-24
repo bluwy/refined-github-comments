@@ -30,7 +30,7 @@ const authorsToMinimize = [
   'codspeed-hq',
   'typescript-eslint',
   'nx-cloud',
-  'flathubbot'
+  'flathubbot',
 ]
 
 // common comments that don't really add value
@@ -38,7 +38,7 @@ const commentMatchToMinimize = [
   /^![a-z]/, // commands that start with !
   /^\/[a-z]/, // commands that start with /
   /^> root@0.0.0/, // astro preview release bot
-  /^bot, build/
+  /^bot, build/,
 ]
 
 // #endregion
@@ -107,7 +107,11 @@ function minimizeComment(timelineItem) {
   // minimize the comment
   if (
     (minimizeAllBotComments && headerName.nextElementSibling?.textContent.includes('bot')) ||
+    // check the author name directly
     authorsToMinimize.includes(headerName.innerText) ||
+    // check via the href, which isn't needed actually but because Refined GitHub may change this to
+    // a normal name, we need to fallback to checking via this as well
+    authorsToMinimize.includes(headerName.getAttribute('href').slice(1)) ||
     commentMatchToMinimize.some((match) => match.test(commentBodyText))
   ) {
     const commentContent = timelineItem.querySelector('.edit-comment-hide')
