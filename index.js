@@ -31,6 +31,7 @@ const authorsToMinimize = [
   'typescript-eslint',
   'nx-cloud',
   'flathubbot',
+  'socket-security',
 ]
 
 // common comments that don't really add value
